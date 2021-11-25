@@ -5,6 +5,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+//
+// トークナイザー
+//
+
 // トークンの種類
 typedef enum {
   TK_RESERVED, // 記号
@@ -91,8 +95,7 @@ Token *new_token(TokenKind kind, Token *cur, char *str) {
 }
 
 // 入力文字列pをトークナイズしてそれを返す
-Token *tokenize() {
-  char *p = user_input;
+Token *tokenize(char *p) {
   Token head;
   head.next = NULL;
   Token *cur = &head;
@@ -104,7 +107,7 @@ Token *tokenize() {
       continue;
     }
 
-    if (*p == '+' || *p == '-') {
+    if (strchr("+-*/()", *p)) {
       cur = new_token(TK_RESERVED, cur, p++);
       continue;
     }
@@ -121,6 +124,10 @@ Token *tokenize() {
   new_token(TK_EOF, cur, p);
   return head.next;
 }
+
+//
+// パーサ
+//
 
 // 抽象構文木のノードの種類
 typedef enum {
@@ -198,37 +205,56 @@ Node *primary() {
   return new_node_num(expect_number());
 }
 
-int main(int argc, char **argv) {
-  if (argc != 2) {
-    error("引数の個数が正しくありません");
-    return 1;
+void gen(Node *node) {
+  if (node->kind == ND_NUM) {
+    printf("  push %d\n", node->val);
+    return;
   }
 
-  // トークナイズする
+  gen(node->lhs);
+  gen(node->rhs);
+
+  printf("  pop rdi\n");
+  printf("  pop rax\n");
+
+  switch (node->kind) {
+    case ND_ADD:
+      printf("  add rax, rdi\n");
+      break;
+    case ND_SUB:
+      printf("  sub rax, rdi\n");
+      break;
+    case ND_MUL:
+      printf("  imul rax, rdi\n");
+      break;
+    case ND_DIV:
+      printf("  cqo\n");
+      printf("  idiv rdi\n");
+      break;
+  }
+
+  printf("  push rax\n");
+}
+
+int main(int argc, char **argv) {
+  if (argc != 2) error("%s: 引数の個数が正しくありません", argv[0]);
+
+  // トークナイズしてパースする
   user_input = argv[1];
-  token = tokenize();
+  token = tokenize(user_input);
+  Node *node = expr();
 
   // アセンブリの前半部分を出力
   printf(".intel_syntax noprefix\n");
   printf(".globl main\n");
   printf("main:\n");
 
-  // 式の最初は数でなければならないので、それをチェックして
-  // 最初のmov命令を出力
-  printf("  mov rax, %d\n", expect_number());
+  // 抽象構文木を下りながらコード生成
+  gen(node);
 
-  // `+ <数>`あるいは`- <数>`というトークンの並びを消費しつつ
-  // アセンブリを出力
-  while (!at_eof()) {
-    if (consume('+')) {
-      printf("  add rax, %d\n", expect_number());
-      continue;
-    }
-
-    expect('-');
-    printf("  sub rax, %d\n", expect_number());
-  }
-
+  // スタックトップに式全体の値が残っているはずなので
+  // それをRAXにロードして関数からの返り値とする
+  printf("  pop rax\n");
   printf("  ret\n");
   return 0;
 }
