@@ -156,6 +156,10 @@ Node *new_node_num(int val) {
   return node;
 }
 
+Node *expr();
+Node *mul();
+Node *primary();
+
 Node *expr() {
   Node *node = mul();
 
