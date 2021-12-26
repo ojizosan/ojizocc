@@ -1,9 +1,7 @@
 #include "9cc.h"
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
+
+char *user_input;
+Token *token;
 
 // エラー箇所を報告する
 void error_at(char *loc, char *fmt, ...) {

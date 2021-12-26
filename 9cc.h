@@ -1,4 +1,9 @@
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 
 typedef enum {
   TK_RESERVED, // 記号
@@ -73,4 +78,4 @@ Node *mul();
 Node *unary();
 Node *primary();
 
-void gen(Node *node);
+void codegen(Node *node);

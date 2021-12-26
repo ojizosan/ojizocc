@@ -1,5 +1,4 @@
 #include "9cc.h"
-#include <stdio.h>
 
 void gen(Node *node) {
   if (node->kind == ND_NUM) {
@@ -50,4 +49,18 @@ void gen(Node *node) {
   }
 
   printf("  push rax\n");
+}
+
+void codegen(Node *node) {
+  printf(".intel_syntax noprefix\n");
+  printf(".globl main\n");
+  printf("main:\n");
+
+  // 抽象構文木を下りながらコード生成
+  gen(node);
+
+  // スタックトップに式全体の値が残っているはずなので
+  // それをRAXにロードして関数からの返り値とする
+  printf("  pop rax\n");
+  printf("  ret\n");
 }
