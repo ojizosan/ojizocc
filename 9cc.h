@@ -74,6 +74,10 @@ Node *new_binary(NodeKind kind, Node *lhs, Node *rhs);
 
 Node *new_num(int val);
 
+extern Node *code[100];
+
+void program();
+
 Node *expr();
 Node *equality();
 Node *relational();
@@ -82,4 +86,4 @@ Node *mul();
 Node *unary();
 Node *primary();
 
-void codegen(Node *node);
+void codegen();

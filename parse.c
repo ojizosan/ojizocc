@@ -2,6 +2,7 @@
 
 char *user_input;
 Token *token;
+Node *code[100];
 
 // エラー箇所を報告する
 void error_at(char *loc, char *fmt, ...) {
@@ -108,7 +109,7 @@ Token *tokenize(char *p) {
       continue;
     }
 
-    if (strchr("+-*/()<>", *p)) {
+    if (strchr("+-*/()<>;", *p)) {
       cur = new_token(TK_RESERVED, cur, p++, 1);
       continue;
     }
@@ -152,9 +153,6 @@ Node *new_num(int val) {
   return node;
 }
 
-Node *code[100];
-
-void program();
 Node *stmt();
 Node *assign();
 Node *expr();
