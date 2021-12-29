@@ -38,6 +38,18 @@ bool consume(char *op) {
   return true;
 }
 
+// 次のトークンが期待している条件を満たすローカル変数であるときは、
+// そのトークンを返し、トークンを1つ読み進る。。それ以外の場合にはNULLを返す。
+Token *consume_ident() {
+  if (token->kind != TK_IDENT ||
+      token->len != 1 ||
+      !('a' <= token->str[0] && token->str[0] <= 'z'))
+    return NULL;
+  Token *tok = token;
+  token = token->next;
+  return tok;
+}
+
 // 次のトークンが期待している記号のときには、トークンを1つ読み進める。
 // それ以外の場合にはエラーを報告する。
 void expect(char *op) {
@@ -109,6 +121,11 @@ Token *tokenize(char *p) {
       continue;
     }
 
+    if ('a' <= *p && *p <= 'z') {
+      cur = new_token(TK_IDENT, cur, p++, 1);
+      cur->len = 1;
+      continue;
+    }
     error_at(p, "トークナイズできません");
   }
 
@@ -135,6 +152,11 @@ Node *new_num(int val) {
   return node;
 }
 
+Node *code[100];
+
+void program();
+Node *stmt();
+Node *assign();
 Node *expr();
 Node *equality();
 Node *relational();
@@ -143,8 +165,27 @@ Node *mul();
 Node *unary();
 Node *primary();
 
+void program() {
+  int i = 0;
+  while (!at_eof())
+    code[i++] = stmt();
+}
+
+Node *stmt() {
+  Node *node = expr();
+  expect(";");
+return node;
+}
+
 Node *expr() {
-  return equality();
+  return assign();
+}
+
+Node *assign() {
+  Node *node = equality();
+  if (consume("="))
+    node = new_binary(ND_ASSIGN, node, assign());
+  return node;
 }
 
 Node *equality() {
@@ -219,6 +260,13 @@ Node *primary() {
     return node;
   }
 
+  Token *tok = consume_ident();
+  if (tok) {
+    Node *node = calloc(1, sizeof(Node));
+    node->kind = ND_LVAR;
+    node->offset = (tok->str[0] - 'a' + 1) * 8;
+    return node;
+  }
   // そうでなければ数値のはず
   return new_num(expect_number());
 }
