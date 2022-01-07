@@ -46,12 +46,6 @@ bool consume(char *op) {
   return true;
 }
 
-bool consume_return(TokenKind kind) {
-  if (token->kind != kind) return false;
-  token = token->next;
-  return true;
-}
-
 // 次のトークンが期待している条件を満たすローカル変数であるときは、
 // そのトークンを返し、トークンを1つ読み進る。。それ以外の場合にはNULLを返す。
 Token *consume_ident() {
@@ -115,8 +109,12 @@ Token *tokenize(char *p) {
       continue;
     }
 
-    if (strncmp(p, "return", 6) == 0 && !is_alnum(p[6])) {
-      cur = new_token(TK_RETURN, cur, p, 6);
+    if ((startswith(p, "return") && !is_alnum(p[6])) ||
+        (startswith(p, "if") && !is_alnum(p[2])) ||
+        (startswith(p, "else") && !is_alnum(p[4])) ||
+        (startswith(p, "for") && !is_alnum(p[3])) ||
+        (startswith(p, "while") && !is_alnum(p[5]))) {
+      cur = new_token(TK_RESERVED, cur, p, 6);
       p += 6;
       continue;
     }
@@ -191,7 +189,7 @@ void program() {
 Node *stmt() {
   Node *node;
 
-  if (consume_return(TK_RETURN)) {
+  if (consume("return")) {
     node = calloc(1, sizeof(Node));
     node->kind = ND_RETURN;
     node->lhs = expr();
