@@ -50,6 +50,16 @@ struct Node {
   int offset;    // kindがND_LVARの場合のみ使う
 };
 
+typedef struct LVar LVar;
+
+// ローカル変数の型
+struct LVar {
+  LVar *next;
+  char *name;
+  int len;
+  int offset;
+};
+
 void error_at(char *loc, char *fmt, ...);
 
 void error(char *fmt, ...);
@@ -75,6 +85,7 @@ Node *new_binary(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_num(int val);
 
 extern Node *code[100];
+extern LVar *locals;
 
 void program();
 
