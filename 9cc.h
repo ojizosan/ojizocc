@@ -38,6 +38,7 @@ typedef enum {
   ND_ASSIGN, // =
   ND_LVAR,   // ローカル変数
   ND_NUM,    // 整数
+  ND_RETURN, // return
 } NodeKind;
 
 typedef struct Node Node;
