@@ -57,7 +57,7 @@ assert 1 '1>=0;'
 assert 1 '1>=1;'
 assert 0 '1>=2;'
 
-assert 5 'foo = 1; bar = 2 + 3; foo + bar;'
 assert 3 'return 3; return 5;'
+assert 5 'foo = 1; bar = 2 + 3; return foo + bar;'
 
 echo OK
