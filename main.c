@@ -6,10 +6,12 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  // トークナイズしてパースする
-  // 結果はcodeに保存される
+  // トークナイズする
   user_input = argv[1];
   token = tokenize(user_input);
+
+  // 抽象構文木を生成する
+  // 結果はcodeに保存される
   program();
 
   // アセンブリの前半部分を出力
