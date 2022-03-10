@@ -32,7 +32,8 @@ void error(char *fmt, ...) {
 // 次のトークンが期待している記号のときには、トークンを1つ読み進めて
 // 真を返す。それ以外の場合には偽を返す。
 bool consume(char *op) {
-  if (token->kind != TK_RESERVED ||
+  if (!(token->kind == TK_RESERVED ||
+       token->kind == TK_RETURN) ||
       strlen(op) != token->len ||
       memcmp(token->str, op, token->len))
     return false;
@@ -109,7 +110,7 @@ Token *tokenize(char *p) {
       continue;
     }
 
-    if ((startswith(p, "return") && !is_alnum(p[6]))) {
+    if (startswith(p, "return") && !is_alnum(p[6])) {
       cur = new_token(TK_RETURN, cur, p, 6);
       p += 6;
       continue;
