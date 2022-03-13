@@ -41,6 +41,12 @@ bool consume(char *op) {
   return true;
 }
 
+bool consume_reserved(TokenKind kind) {
+  if (token->kind != kind) return false;
+  token = token->next;
+  return true;
+}
+
 // 次のトークンが期待している条件を満たすローカル変数であるときは、
 // そのトークンを返し、トークンを1つ読み進る。。それ以外の場合にはNULLを返す。
 Token *consume_ident() {
@@ -49,10 +55,6 @@ Token *consume_ident() {
   Token *tok = token;
   token = token->next;
   return tok;
-}
-
-bool consume_reserved_token() {
-  
 }
 
 // 次のトークンが期待している記号のときには、トークンを1つ読み進める。
@@ -128,7 +130,7 @@ void program() {
 Node *stmt() {
   Node *node;
 
-  if (consume("return")) {
+  if (consume_reserved(TK_RETURN)) {
     node = calloc(1, sizeof(Node));
     node->kind = ND_RETURN;
     node->lhs = expr();

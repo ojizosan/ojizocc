@@ -10,7 +10,11 @@ typedef enum {
   TK_IDENT,    // 識別子
   TK_NUM,      // 整数トークン
   TK_EOF,      // 入力の終わりを表すトークン
-  TK_RETURN    // 予約語"return"を表すトークン
+  TK_RETURN,   // 予約語"return"を表すトークン
+  TK_IF,       // 予約語"if"を表すトークン
+  TK_ELSE,     // 予約語"else"を表すトークン
+  TK_WHILE,    // 予約語"while"を表すトークン
+  TK_FOR,      // 予約語"for"を表すトークン
 } TokenKind;
 
 typedef struct Token Token;
