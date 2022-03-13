@@ -3,7 +3,7 @@
 char *user_input;
 Token *token;
 Node *code[100];
-LVar *locals;
+LVar *locals = NULL;
 
 // エラー箇所を報告する
 void error_at(char *loc, char *fmt, ...) {
@@ -51,6 +51,10 @@ Token *consume_ident() {
   return tok;
 }
 
+bool consume_reserved_token() {
+  
+}
+
 // 次のトークンが期待している記号のときには、トークンを1つ読み進める。
 // それ以外の場合にはエラーを報告する。
 void expect(char *op) {
@@ -75,81 +79,7 @@ bool at_eof() {
   return token->kind == TK_EOF;
 }
 
-// 新しいトークンを作成してcurに繋げる
-Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
-  Token *tok = calloc(1, sizeof(Token));
-  tok->kind = kind;
-  tok->str = str;
-  tok->len = len;
-  cur->next = tok;
-  return tok;
-}
 
-bool startswith(char *p, char *q) {
-  return memcmp(p, q, strlen(q)) == 0;
-}
-
-bool is_alpha(char c) {
-  return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '_';
-}
-
-bool is_alnum(char c) {
-  return is_alpha(c) || ('0' <= c && c <= '9');
-}
-
-// 入力文字列pをトークナイズしてそれを返す
-Token *tokenize(char *p) {
-  Token head;
-  head.next = NULL;
-  Token *cur = &head;
-
-  while (*p) {
-    // 空白文字をスキップ
-    if (isspace(*p)) {
-      p++;
-      continue;
-    }
-
-    if (startswith(p, "return") && !is_alnum(p[6])) {
-      cur = new_token(TK_RETURN, cur, p, 6);
-      p += 6;
-      continue;
-    }
-
-    if (startswith(p, "==") || startswith(p, "!=") ||
-        startswith(p, "<=") || startswith(p, ">=")) {
-      cur = new_token(TK_RESERVED, cur, p, 2);
-      p += 2;
-      continue;
-    }
-
-    if (strchr("+-*/()<>;=", *p)) {
-      cur = new_token(TK_RESERVED, cur, p++, 1);
-      continue;
-    }
-
-    if (isdigit(*p)) {
-      cur = new_token(TK_NUM, cur, p, 0);
-      char *q = p;
-      cur->val = strtol(p, &p, 10);
-      cur->len = p - q;
-      continue;
-    }
-
-    // ローカル変数をトークン化
-    if (is_alpha(*p)) {
-      char *q = p++;
-      while (is_alnum(*p)) p++;
-      cur = new_token(TK_IDENT, cur, q, p - q);
-      continue;
-    }
-
-    error_at(p, "トークナイズできません");
-  }
-
-  new_token(TK_EOF, cur, p, 0);
-  return head.next;
-}
 
 Node *new_node(NodeKind kind) {
   Node *node = calloc(1, sizeof(Node));
@@ -178,6 +108,7 @@ LVar *find_lvar(Token *tok) {
   return NULL;
 }
 
+void program();
 Node *stmt();
 Node *assign();
 Node *expr();
@@ -301,14 +232,26 @@ Node *primary() {
     LVar *lvar = find_lvar(tok);
     if (lvar) {
       node->offset = lvar->offset;
-    } else {
-      lvar = calloc(1, sizeof(LVar));
-      lvar->next = locals;
-      lvar->name = tok->str;
-      lvar->len = tok->len;
-      lvar->offset = locals->offset + 8;
-      node->offset = lvar->offset;
-      locals = lvar;
+    }
+    else {
+      if (locals) {
+        lvar = calloc(1, sizeof(LVar));
+        lvar->next = locals;
+        lvar->name = tok->str;
+        lvar->len = tok->len;
+        lvar->offset = locals->offset + 8;
+        node->offset = lvar->offset;
+        locals = lvar;
+      }
+      else {
+        lvar = calloc(1, sizeof(LVar));
+        lvar->next = NULL;
+        lvar->name = tok->str;
+        lvar->len = tok->len;
+        lvar->offset = 8;
+        node->offset = lvar->offset;
+        locals = lvar;
+      }
     }
     return node;
   }
