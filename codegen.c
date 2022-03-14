@@ -10,6 +10,7 @@ void gen_lval(Node *node) {
 }
 
 void gen(Node *node) {
+  int end = 0, begin = 0, els = 0;
   switch (node->kind) {
     case ND_NUM:
       printf("  push %d\n", node->val);
@@ -36,6 +37,28 @@ void gen(Node *node) {
       printf("  pop rbp\n");
       printf("  ret\n");
       return;
+    case ND_IF:
+      if (node->els == NULL) {
+        gen(node->cond);
+        printf("  pop rax\n");
+        printf("  cmp rax, 0\n");
+        printf("  je .Lend%03d\n", end);
+        gen(node->then);
+        printf(".Lend%03d:\n", end++);
+        return;
+      }
+      else {
+        gen(node->cond);
+        printf("  pop rax\n");
+        printf("  cmp rax, 0\n");
+        printf("  je .Lelse%03d\n", els);
+        gen(node->then);
+        printf("  jmp .Lend%03d\n", end);
+        printf(".Lelse%03d:\n", els++);
+        gen(node->els);
+        printf(".Lend%03d:\n", end++);
+        return;
+      }
   }
 
   gen(node->lhs);
