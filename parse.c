@@ -148,6 +148,14 @@ Node *stmt() {
     }
     else node->els = NULL;
   }
+  else if (consume_reserved(TK_WHILE)) {
+    node = calloc(1, sizeof(Node));
+    node->kind = ND_WHILE;
+    expect("(");
+    node->cond = expr();
+    expect(")");
+    node->then = stmt();
+  }
   else {
     node = expr();
     expect(";");

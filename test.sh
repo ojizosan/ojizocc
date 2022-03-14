@@ -61,10 +61,10 @@ assert 3 'return 3; return 5;'
 assert 6 'foo = 1; bar = 2 + 3; foo + bar;'
 assert 6 'foo = 1; bar = 2 + 3; return foo + bar; foo;'
 
-# if文のテスト
+# 制御構文のテスト
 assert 0 'if (2 == 3) return 1; else return 0;'
 assert 55 'foo = 40; bar = 15; if (foo + bar > 50) ooh = foo + bar; else ooh = foo - bar; return ooh;'
-
+assert 100 'i = 1; while (i < 100) i = i + 1; return i;'
 
 echo OK
 
