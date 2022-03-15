@@ -154,7 +154,7 @@ Node *stmt() {
     expect("(");
     node->cond = expr();
     expect(")");
-    node->then = stmt();
+    node->body = stmt();
   }
   else {
     node = expr();
