@@ -66,6 +66,8 @@ assert 0 'if (2 == 3) return 1; else return 0;'
 assert 55 'foo = 40; bar = 15; if (foo + bar > 50) ooh = foo + bar; else ooh = foo - bar; return ooh;'
 assert 100 'i = 1; while (i < 100) i = i + 1; return i;'
 assert 51 'i = 1; while (i < 100) if (i > 50) return i; else i = i + 1;'
+assert 51 'for (i = 0; i <= 50; i = i + 1) 1; return i;'
+assert 25 'for (i = 0;; i = i + 1) if (i == 25) return i;'
 
 echo OK
 
