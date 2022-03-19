@@ -1,5 +1,7 @@
 #include "9cc.h"
 
+int labelseq = 0;
+
 void gen_lval(Node *node) {
   if (node->kind != ND_LVAR)
     error("代入の左辺値が変数ではありません");
@@ -8,8 +10,6 @@ void gen_lval(Node *node) {
   printf("  sub rax, %d\n", node->offset);
   printf("  push rax\n");
 }
-
-int end = 0, begin = 0, els = 0;
 
 void gen(Node *node) {  
   switch (node->kind) {
@@ -38,46 +38,49 @@ void gen(Node *node) {
       printf("  pop rbp\n");
       printf("  ret\n");
       return;
-    case ND_IF:
-      {
+    case ND_IF: {
+      int seq = labelseq++;
       gen(node->cond);
       printf("  pop rax\n");
       printf("  cmp rax, 0\n");
-      int n_end_label = end++;
       if (node->els == NULL) {
-        printf("  je .Lend%03d\n", n_end_label);
+        printf("  je .Lend%03d\n", seq);
         gen(node->then);
       }
       else {
-        int n_else_label = els++;
-        printf("  je .Lelse%03d\n", n_else_label);
+        printf("  je .Lelse%03d\n", seq);
         gen(node->then);
-        printf("  jmp .Lend%03d\n", n_end_label);
-        printf(".Lelse%03d:\n", n_else_label);
+        printf("  jmp .Lend%03d\n", seq);
+        printf(".Lelse%03d:\n", seq);
         gen(node->els);
       }
-      printf(".Lend%03d:\n", n_end_label);
+      printf(".Lend%03d:\n", seq);
       return;
-      }
-    case ND_WHILE:
-      {
-      int n_begin_label = begin++;
-      printf(".Lbegin%03d:\n", n_begin_label);
+    }
+    case ND_WHILE: {
+      int seq = labelseq++;
+      printf(".Lbegin%03d:\n", seq);
       gen(node->cond);
       printf("  pop rax\n");
       printf("  cmp rax, 0\n");
-      int n_end_label = end++;
-      printf("  je .Lend%03d\n", n_end_label);
+      printf("  je .Lend%03d\n", seq);
       gen(node->body);
-      printf("  jmp .Lbegin%03d\n", n_begin_label);
-      printf(".Lend%03d:\n", n_end_label);
+      printf("  jmp .Lbegin%03d\n", seq);
+      printf(".Lend%03d:\n", seq);
       return;
+    }
+/*    case ND_FOR: {
+      int seq = labelseq++;
+      if (node->init) gen(node->init);
+      printf(".Lbegin%03d:\n", seq);
+      if (node->cond) {
+        gen(node->cond);
+        printf("  pop rax\n");
+        printg("  cmp rax, 0\n");
+        printf("  je .Lend%d\n", seq);
       }
-/*    case ND_FOR:
-      gen(node->init);
-      printf(".Lbegin%03d:\n", begin);*/
+    }*/
   }
-
   gen(node->lhs);
   gen(node->rhs);
 
