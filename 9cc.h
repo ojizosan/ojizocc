@@ -47,6 +47,7 @@ typedef enum {
   ND_IF,
   ND_WHILE,
   ND_FOR,
+  ND_BLOCK,
 } NodeKind;
 
 typedef struct Node Node;
@@ -57,14 +58,14 @@ struct Node {
   Node *rhs;     // 右辺
   int val;       // kindがND_NUMの場合のみ使う
   int offset;    // kindがND_LVARの場合のみ使う
-  // if文 kindがND_IFの場合のみ使う
+  // if, for, while で使用
   Node *cond;    // 条件式
   Node *then;    // 条件式が真の場合に実行する文
   Node *els;     // 条件式が気の場合に実行する文
-  // for文で使う
   Node *init;    // 初期化式
   Node *inc;     // 更新式
   Node *body;    // 中身
+  Node *next;
 };
 
 // 変数一覧を保持する連結リスト

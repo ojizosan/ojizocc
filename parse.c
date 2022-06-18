@@ -130,7 +130,12 @@ void program() {
 Node *stmt() {
   Node *node;
 
-  if (consume_reserved(TK_RETURN)) {
+  if (consume("{")) {
+    Node head;
+    head.next = NULL;
+    Node *cur = &head;
+  }
+  else if (consume_reserved(TK_RETURN)) {
     node = calloc(1, sizeof(Node));
     node->kind = ND_RETURN;
     node->lhs = expr();
