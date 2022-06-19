@@ -134,6 +134,14 @@ Node *stmt() {
     Node head;
     head.next = NULL;
     Node *cur = &head;
+
+    while (!consume("}")) {
+      cur->next = stmt();
+      cur = cur->next;
+    }
+
+    Node *node = new_node(ND_BLOCK);
+    node->body = head.next;
   }
   else if (consume_reserved(TK_RETURN)) {
     node = calloc(1, sizeof(Node));
