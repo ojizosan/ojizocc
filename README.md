@@ -1,3 +1,3 @@
-# 9cc
+# ojizocc
 
 https://www.sigbus.info/compilerbook
